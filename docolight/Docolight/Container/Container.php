@@ -14,7 +14,7 @@ use CApplicationComponent;
  * ```php
  *
  * // Instantiate new container
- * $container = new Docolight\Container;
+ * $container = new Docolight\Container\Container;
  *
  * // Bind a container
  * $container->bind('foo', function () { return new Foo; });
@@ -45,7 +45,7 @@ use CApplicationComponent;
  * }
  *
  *
- * $container = new Docolight\Container;
+ * $container = new Docolight\Container\Container;
  *
  * $container->bind('FooContract', 'Foo');
  *
