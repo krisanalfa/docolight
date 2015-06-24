@@ -11,6 +11,8 @@ because DocoLight include these powerfull packages:
 - Helper
 - And many more
 
+---
+
 ## Installation
 
 Just clone this repository to your project:
@@ -45,13 +47,21 @@ dd(container('response')->produce());
 If you find a page with something like this, DocoLight has enlighten your life.
 ![docolight](http://s12.postimg.org/qea787eil/sekretariat_ahu_local_surat_Tugas.png)
 
+---
+
 ## Using a Container
 
 ### (To Be Defined Later)
+
+---
 
 ## Make a Response
 
 ### (To Be Defined Later)
 
+---
+
 ## Additional Helper Class
+
+### (To Be Defined Later)
 
