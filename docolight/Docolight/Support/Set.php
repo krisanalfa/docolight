@@ -49,12 +49,18 @@ class Set implements ArrayAccess, Countable, IteratorAggregate
     /**
      * Set data key to value.
      *
-     * @param string $key   The data key
-     * @param mixed  $value The data value
+     * @param string|array $key   The data key or key / value pair array
+     * @param mixed        $value The data value
      */
     public function set($key, $value)
     {
-        $this->data[$this->normalizeKey($key)] = $value;
+        if (is_array($key)) {
+            foreach ($key as $innerKey => $innerValue) {
+                $this->set($innerKey, $innerValue);
+            }
+        } else {
+            $this->data[$this->normalizeKey($key)] = $value;
+        }
     }
 
     /**
@@ -73,7 +79,7 @@ class Set implements ArrayAccess, Countable, IteratorAggregate
             return $isInvokable ? $this->data[$this->normalizeKey($key)]($this) : $this->data[$this->normalizeKey($key)];
         }
 
-        return $default;
+        return value($default);
     }
 
     /**
