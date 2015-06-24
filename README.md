@@ -87,7 +87,7 @@ class Foo implements FooContract
 class FooFactory
 {
     protected $foo = null;
-    
+
     public function __construct(FooContract $foo)
     {
         $this->foo = $foo;
@@ -98,7 +98,8 @@ $container = new Docolight\Container\Container;
 
 $container->bind('FooContract', 'Foo');
 
-$fooFactory = $container->make('FooFactory'); // equals with: $fooFactory = new FooFactory(new Foo());
+$fooFactory = $container->make('FooFactory');
+// equals with: $fooFactory = new FooFactory(new Foo());
 ```
 
 You can also access `container` function:
@@ -222,7 +223,7 @@ Or via `response` function:
 response('json', 200, new Docolight\Support\Fluent($data), array('My-Header' => 'My header value'))->send();
 ```
 
-> **NOTE: ** The argument passed to `setBody` on JsonResponse must implements `Docolight\Http\Contract\Arrayable`. Meanwhile, `Docolight\Support\Fluent`, `Docolight\Support\Collection`, and `Docolight\Support\ActiveRecordWrappert` implements this interface.
+> **NOTE** The argument passed to `setBody` on JsonResponse must implements `Docolight\Http\Contract\Arrayable`. Meanwhile, `Docolight\Support\Fluent`, `Docolight\Support\Collection`, and `Docolight\Support\ActiveRecordWrappert` implements this interface.
 
 ---
 
@@ -353,3 +354,4 @@ Determine if the given haystack contains the given needle.
 $value = str_contains('This is my name', 'my'); // true
 $anotherValue = str_contains('This is my name', 'you'); // false
 ```
+
