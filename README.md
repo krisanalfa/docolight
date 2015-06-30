@@ -45,7 +45,7 @@ dd(container('response')->produce());
 ```
 
 If you find a page with something like this, DocoLight has enlighten your life.
-![docolight](http://s12.postimg.org/qea787eil/sekretariat_ahu_local_surat_Tugas.png)
+![docolight](http://s4.postimg.org/6tgpuicp9/sekretariat_ahu_local_gears_rkakl.png)
 
 ---
 
@@ -227,7 +227,7 @@ response('json', 200, new Docolight\Support\Fluent($data), array('My-Header' => 
 
 ---
 
-## Additional Helper Class
+## Additional Helper Functions
 
 Below is some of helpers available in DocoLight:
 
