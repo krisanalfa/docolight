@@ -53,32 +53,33 @@ class Carbonate
         ),
     );
 
+    protected static $localeDays = array(
+        'id' => array(
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jum\'at',
+            6 => 'Sabtu',
+            7 => 'Minggu',
+        ),
+    );
+
     /**
      * Format date to Indonesia Locale.
      *
      * @param string $date
      * @param string $format
+     * @param string $returnFormat
      *
      * @return string|null
      */
-    public static function formatId($date, $format = 'Y-m-d H:i:s')
+    public static function formatId($date, $format = 'Y-m-d H:i:s', $returnFormat = 'D, d M Y')
     {
         $date = Carbon::createFromFormat($format, $date);
 
-        return ($date) ? static::formatLocale($date, 'id', 'd M Y')
+        return ($date) ? static::formatLocale($date, 'id', $returnFormat)
                        : null;
-    }
-
-    /**
-     * Get month index. Useful for translation.
-     *
-     * @param \Carbon\Carbon $date
-     *
-     * @return int|null
-     */
-    public function monthIndex(Carbon $date)
-    {
-        return def(static::$month, $date->format('M'));
     }
 
     /**
@@ -92,7 +93,33 @@ class Carbonate
      */
     public static function formatLocale(Carbon $date, $locale, $returnFormat)
     {
-        return str_replace($date->format('M'), static::localeMonth($date, $locale), $date->format($returnFormat));
+        $date->setLocale('en');
+
+        $replacedMonth = str_replace($date->format('M'), static::localeMonth($date, $locale), $date->format($returnFormat));
+        $replacedDay = str_replace($date->format('D'), static::localeDay($date, $locale), $replacedMonth);
+
+        return $replacedDay;
+    }
+
+    /**
+     * Get month index. Useful for translation.
+     *
+     * @param \Carbon\Carbon $date
+     *
+     * @return int|null
+     */
+    public static function monthIndex(Carbon $date)
+    {
+        $date->setLocale('en');
+
+        return def(static::$month, $date->format('M'));
+    }
+
+    public static function dayIndex(Carbon $date)
+    {
+        $date->setLocale('en');
+
+        return def(static::$day, $date->format('D'));
     }
 
     /**
@@ -106,6 +133,29 @@ class Carbonate
     public static function localeMonth(Carbon $date, $locale)
     {
         return def(static::localeMonths($locale), static::monthIndex($date));
+    }
+
+    /**
+     * Get translated locale day
+     *
+     * @param \Carbon\Carbon $date
+     * @param string         $locale
+     *
+     * @return string|null
+     */
+    public static function localeDay(Carbon $date, $locale)
+    {
+        return def(static::localeDays($locale), static::dayIndex($date));
+    }
+
+    /**
+     * Get days name lists
+     *
+     * @return array
+     */
+    public static function localeDays($locale)
+    {
+        return def(static::$localeDays, $locale, array());
     }
 
     /**

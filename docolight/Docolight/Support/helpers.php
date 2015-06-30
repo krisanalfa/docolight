@@ -1166,6 +1166,10 @@ if (!function_exists('response')) {
      */
     function response($driver = 'base', $status = 200, $body = '', array $headers = array(), $immediatelySend = false)
     {
+        if (! container()->bound('Docolight\Http\ResponseFactory')) {
+            throw new RuntimeException('Class [Docolight\Http\ResponseFactory] has not been bound yet.');
+        }
+
         $numberOfArguments = func_num_args();
 
         $response = container('response');

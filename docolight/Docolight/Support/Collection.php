@@ -26,6 +26,13 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     protected $items = [];
 
     /**
+     * The items contained in the collection.
+     *
+     * @var array
+     */
+    protected $filters = [];
+
+    /**
      * Create a new collection.
      *
      * @param mixed $items
@@ -1020,6 +1027,38 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     }
 
     /**
+     * Hack method to render CGridView.
+     *
+     * @return boolean
+     */
+    public function hasErrors()
+    {
+        return false;
+    }
+
+    /**
+     * Hack method to render CGridView.
+     *
+     * @param string $attribute
+     *
+     * @return array
+     */
+    public function getValidators($attribute)
+    {
+        return array();
+    }
+
+    /**
+     * Set current filter to this collection.
+     *
+     * @param array $filters
+     */
+    public function setFilters(array $filters)
+    {
+        $this->filters = new Fluent($filters);
+    }
+
+    /**
      * Results array of items from Collection or Arrayable.
      *
      * @param mixed $items
@@ -1035,5 +1074,19 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
         }
 
         return (array) $items;
+    }
+
+    /**
+     * Method overloading to get current filter attribute. Useful if we want to render CGridView.
+     *
+     * @param string $name Filter field name
+     *
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        if ($this->filters) {
+            return $this->filters->{$name};
+        }
     }
 }

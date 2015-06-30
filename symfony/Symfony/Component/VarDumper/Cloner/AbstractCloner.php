@@ -1,4 +1,15 @@
-<?php namespace Symfony\Component\VarDumper\Cloner;
+<?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\VarDumper\Cloner;
 
 use Symfony\Component\VarDumper\Caster\Caster;
 use Symfony\Component\VarDumper\Exception\ThrowingCasterException;
@@ -54,6 +65,7 @@ abstract class AbstractCloner implements ClonerInterface
 
         'ErrorException' => 'Symfony\Component\VarDumper\Caster\ExceptionCaster::castErrorException',
         'Exception' => 'Symfony\Component\VarDumper\Caster\ExceptionCaster::castException',
+        'Error' => 'Symfony\Component\VarDumper\Caster\ExceptionCaster::castError',
         'Symfony\Component\DependencyInjection\ContainerInterface' => 'Symfony\Component\VarDumper\Caster\StubCaster::cutInternals',
         'Symfony\Component\VarDumper\Exception\ThrowingCasterException' => 'Symfony\Component\VarDumper\Caster\ExceptionCaster::castThrowingCasterException',
 
@@ -218,7 +230,7 @@ abstract class AbstractCloner implements ClonerInterface
             $classInfo = array(
                 $class,
                 new \ReflectionClass($class),
-                array_reverse(array('*' => '*', $class => $class) + class_parents($class) + class_implements($class)),
+                array_reverse(array($class => $class) + class_parents($class) + class_implements($class) + array('*' => '*')),
             );
 
             $this->classInfo[$class] = $classInfo;

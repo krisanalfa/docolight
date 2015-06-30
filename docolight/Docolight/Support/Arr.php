@@ -637,11 +637,11 @@ class Arr
     {
         $array = array();
 
-        foreach ($input as $value) {
+        foreach ($input as $key => $value) {
             if (is_callable($search)) {
-                $array[] = $search($value);
+                $array[$key] = $search($value);
             } else {
-                $array[] = str_replace($search, $replacement, $value);
+                $array[$key] = str_replace($search, $replacement, $value);
             }
         }
 

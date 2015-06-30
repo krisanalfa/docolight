@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\VarDumper\Dumper;
 
 use Symfony\Component\VarDumper\Cloner\Cursor;
@@ -22,21 +31,30 @@ class HtmlDumper extends CliDumper
     protected $headerIsDumped = false;
     protected $lastDepth = -1;
     protected $styles = array(
-        'default' => 'background-color:#272822; color:#dcdcdc; line-height:1.2em; font-weight:normal; font:12px "Droid Sans Mono for Powerline", "Droid Sans Mono", Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:100000',
-        'num' => 'font-weight:bold; color:#ae81ff',
+        'default' => 'background-color:#18171B; color:#FF8400; line-height:1.2em; font:12px Menlo, Monaco, Consolas, monospace; word-wrap: break-word; white-space: pre-wrap; position:relative; z-index:100000',
+        'num' => 'font-weight:bold; color:#1299DA',
         'const' => 'font-weight:bold',
-        'str' => 'font-weight:bold; color:#56db3a',
+        'str' => 'font-weight:bold; color:#56DB3A',
         'cchr' => 'font-style:italic',
-        'note' => 'font-weight:bold; color:#1dfdf5',
-        'ref' => 'color:#dcdcdc',
-        'solo-ref' => 'color:#dcdcdc',
-        'public' => 'color:#fffd6e',
-        'protected' => 'font-style:italic; color:#ff9100',
-        'private' => 'font-style:italic; color:#fd2929',
-        'meta' => 'color:#b729d9',
-        'key' => 'color:#e929ff',
-        'index' => 'color:#e929ff',
+        'note' => 'color:#1299DA',
+        'ref' => 'color:#A0A0A0',
+        'solo-ref' => 'color:#839496',
+        'public' => 'color:#FFFFFF',
+        'protected' => 'color:#FFFFFF',
+        'private' => 'color:#FFFFFF',
+        'meta' => 'color:#B729D9',
+        'key' => 'color:#56DB3A',
+        'index' => 'color:#1299DA',
     );
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct($output = null, $charset = null)
+    {
+        parent::__construct($output, $charset);
+        $this->dumpId = 'sf-dump-'.mt_rand();
+    }
 
     /**
      * {@inheritdoc}
@@ -86,8 +104,8 @@ class HtmlDumper extends CliDumper
      */
     public function dump(Data $data, $output = null)
     {
-        $this->dumpId = 'sf-dump-'.mt_rand();
         parent::dump($data, $output);
+        $this->dumpId = 'sf-dump-'.mt_rand();
     }
 
     /**
@@ -108,6 +126,7 @@ Sfdump = window.Sfdump || (function (doc) {
 var refStyle = doc.createElement('style'),
     rxEsc = /([.*+?^${}()|\[\]\/\\])/g,
     idRx = /\bsf-dump-\d+-ref[012]\w+\b/,
+    keyHint = 0 <= navigator.platform.toUpperCase().indexOf('MAC') ? 'Cmd' : 'Ctrl',
     addEventListener = function (e, n, cb) {
         e.addEventListener(n, cb, false);
     };
@@ -247,7 +266,7 @@ return function (root) {
             } else {
                 a.innerHTML += ' ';
             }
-            a.title = (a.title ? a.title+'\n' : '')+'[Ctrl+click] Expand all children';
+            a.title = (a.title ? a.title+'\n[' : '[')+keyHint+'+click] Expand all children';
             a.innerHTML += '<span>▼</span>';
             a.className += ' sf-dump-toggle';
             if ('sf-dump' != elt.parentNode.className) {
@@ -358,10 +377,6 @@ EOHTML;
         }
 
         $v = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-        $v = preg_replace_callback(self::$controlCharsRx, function ($r) {
-            // Use Unicode Control Pictures - see http://www.unicode.org/charts/PDF/U2400.pdf
-            return sprintf('<span class=sf-dump-cchr title=\\x%02X>&#%d;</span>', ord($r[0]), "\x7F" !== $r[0] ? 0x2400 + ord($r[0]) : 0x2421);
-        }, $v);
 
         if ('ref' === $style) {
             if (empty($attr['count'])) {
@@ -378,25 +393,44 @@ EOHTML;
             $style .= sprintf(' title="%s"', empty($attr['dynamic']) ? 'Public property' : 'Runtime added dynamic property');
         } elseif ('str' === $style && 1 < $attr['length']) {
             $style .= sprintf(' title="%s%s characters"', $attr['length'], $attr['binary'] ? ' binary or non-UTF-8' : '');
-        } elseif ('note' === $style) {
-            if (false !== $c = strrpos($v, '\\')) {
-                return sprintf('<abbr title="%s" class=sf-dump-%s>%s</abbr>', $v, $style, substr($v, $c + 1));
-            } elseif (':' === $v[0]) {
-                return sprintf('<abbr title="`%s` resource" class=sf-dump-%s>%s</abbr>', substr($v, 1), $style, $v);
-            }
+        } elseif ('note' === $style && false !== $c = strrpos($v, '\\')) {
+            return sprintf('<abbr title="%s" class=sf-dump-%s>%s</abbr>', $v, $style, substr($v, $c + 1));
         } elseif ('protected' === $style) {
             $style .= ' title="Protected property"';
         } elseif ('private' === $style) {
             $style .= sprintf(' title="Private property defined in class:&#10;`%s`"', $attr['class']);
         }
 
-        return "<span class=sf-dump-$style>$v</span>";
+        $map = static::$controlCharsMap;
+        $style = "<span class=sf-dump-{$style}>";
+        $v = preg_replace_callback(static::$controlCharsRx, function ($c) use ($map, $style) {
+            $s = '</span>';
+            $c = $c[$i = 0];
+            do {
+                $s .= isset($map[$c[$i]]) ? $map[$c[$i]] : sprintf('\x%02X', ord($c[$i]));
+            } while (isset($c[++$i]));
+
+            return $s.$style;
+        }, $v, -1, $cchrCount);
+
+        if ($cchrCount && '<' === $v[0]) {
+            $v = substr($v, 7);
+        } else {
+            $v = $style.$v;
+        }
+        if ($cchrCount && '>' === substr($v, -1)) {
+            $v = substr($v, 0, -strlen($style));
+        } else {
+            $v .= '</span>';
+        }
+
+        return $v;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function dumpLine($depth)
+    protected function dumpLine($depth, $endOfValue = false)
     {
         if (-1 === $this->lastDepth) {
             $this->line = sprintf($this->dumpPrefix, $this->dumpId, $this->indentPad).$this->line;

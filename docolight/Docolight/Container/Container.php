@@ -7,6 +7,7 @@ use ArrayAccess;
 use ReflectionClass;
 use ReflectionParameter;
 use CApplicationComponent;
+use InvalidArgumentException;
 
 /**
  * Inversion of control container is a powerful tool for managing class dependencies. Dependency injection is a method of removing hard-coded class dependencies. Instead, the dependencies are injected at run-time, allowing for greater flexibility as dependency implementations may be swapped easily.
@@ -288,7 +289,7 @@ class Container extends CApplicationComponent implements ArrayAccess
     public function extend($abstract, Closure $closure)
     {
         if (!isset($this->bindings[$abstract])) {
-            throw new \InvalidArgumentException("Type {$abstract} is not bound.");
+            throw new InvalidArgumentException("Type {$abstract} is not bound.");
         }
 
         if (isset($this->instances[$abstract])) {

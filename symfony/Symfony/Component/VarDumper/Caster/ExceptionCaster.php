@@ -1,4 +1,15 @@
-<?php namespace Symfony\Component\VarDumper\Caster;
+<?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\Component\VarDumper\Caster;
 
 use Symfony\Component\VarDumper\Exception\ThrowingCasterException;
 use Symfony\Component\VarDumper\Cloner\Stub;
@@ -29,25 +40,14 @@ class ExceptionCaster
         E_STRICT => 'E_STRICT',
     );
 
+    public static function castError(\Error $e, array $a, Stub $stub, $isNested, $filter = 0)
+    {
+        return $e instanceof \Exception ? $a : self::filterExceptionArray($a, "\0Error\0", $filter);
+    }
+
     public static function castException(\Exception $e, array $a, Stub $stub, $isNested, $filter = 0)
     {
-        $xPrefix = PHP_VERSION_ID >= 70000 ? "\0BaseException\0" : "\0Exception\0";
-        $trace = $a[$xPrefix.'trace'];
-        unset($a[$xPrefix.'trace']); // Ensures the trace is always last
-
-        if (!($filter & Caster::EXCLUDE_VERBOSE)) {
-            static::filterTrace($trace, static::$traceArgs);
-
-            if (null !== $trace) {
-                $a[$xPrefix.'trace'] = $trace;
-            }
-        }
-        if (empty($a[$xPrefix.'previous'])) {
-            unset($a[$xPrefix.'previous']);
-        }
-        unset($a[$xPrefix.'string'], $a[Caster::PREFIX_DYNAMIC.'xdebug_message'], $a[Caster::PREFIX_DYNAMIC.'__destructorException']);
-
-        return $a;
+        return self::filterExceptionArray($a, "\0Exception\0", $filter);
     }
 
     public static function castErrorException(\ErrorException $e, array $a, Stub $stub, $isNested)
@@ -62,10 +62,10 @@ class ExceptionCaster
     public static function castThrowingCasterException(ThrowingCasterException $e, array $a, Stub $stub, $isNested)
     {
         $prefix = Caster::PREFIX_PROTECTED;
-        $xPrefix = PHP_VERSION_ID >= 70000 ? "\0BaseException\0" : "\0Exception\0";
-        $b = (array) $a[$xPrefix.'previous'];
+        $xPrefix = "\0Exception\0";
 
-        if (isset($a[$xPrefix.'trace'][0])) {
+        if (isset($a[$xPrefix.'previous'], $a[$xPrefix.'trace'][0])) {
+            $b = (array) $a[$xPrefix.'previous'];
             $b[$xPrefix.'trace'][0] += array(
                 'file' => $b[$prefix.'file'],
                 'line' => $b[$prefix.'line'],
@@ -109,5 +109,29 @@ class ExceptionCaster
                 unset($t['args']);
             }
         }
+    }
+
+    private static function filterExceptionArray(array $a, $xPrefix, $filter)
+    {
+        if (isset($a[$xPrefix.'trace'])) {
+            $trace = $a[$xPrefix.'trace'];
+            unset($a[$xPrefix.'trace']); // Ensures the trace is always last
+        } else {
+            $trace = array();
+        }
+
+        if (!($filter & Caster::EXCLUDE_VERBOSE)) {
+            static::filterTrace($trace, static::$traceArgs);
+
+            if (null !== $trace) {
+                $a[$xPrefix.'trace'] = $trace;
+            }
+        }
+        if (empty($a[$xPrefix.'previous'])) {
+            unset($a[$xPrefix.'previous']);
+        }
+        unset($a[$xPrefix.'string'], $a[Caster::PREFIX_DYNAMIC.'xdebug_message'], $a[Caster::PREFIX_DYNAMIC.'__destructorException']);
+
+        return $a;
     }
 }
