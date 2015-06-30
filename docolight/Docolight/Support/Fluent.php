@@ -8,8 +8,80 @@ use JsonSerializable;
 use Docolight\Http\Contracts\Arrayable;
 
 /**
- * Magic class like a model.
+ * This class can wrap your array to an object, make it more safe to access and maintain it's attributes. You can try to fill the attribute with your Model Attributes or a bunch of collection of models.
  *
+ * Let's take an example:
+ *
+ * ```php
+ * // This is your array:
+ *
+ * $array = array(
+ *      'foo' => 'bar',
+ *      'baz' => 'qux' );
+ *
+ * // Wrap your array with this class:
+ *
+ * $myCoolArray = new \Docolight\Support\Fluent($array);
+ *
+ * // After that you can do something like this:
+ *
+ * echo $myCoolArray->foo;    // bar  // equals with: echo $myCoolArray['foo'];
+ * echo $myCoolArray->baz;    // qux  // equals with: echo $myCoolArray['baz'];
+ * echo $myCoolArray->blah;   // null // equals with: echo $myCoolArray['blah'];
+ *
+ * $myCoolArray->blah = 'bruh'; // equals with $myCoolArray['blah'] = 'bruh';
+ *
+ * echo $myCoolArray->blah;   // bruh
+ * echo $myCoolArray['blah']; // bruh
+ *
+ * // To get single attribute
+ *
+ * $foo = $myCoolArray->get('foo');
+ *
+ *
+ * // To get specific attributes:
+ *
+ * $fooBaz = $myCoolArray->only(array('foo', 'bar'));
+ *
+ *
+ * // To get all atributes except some attributes:
+ *
+ * $fooBlah = $myCoolArray->except(array('baz'));
+ *
+ *
+ * // To get all attributes:
+ *
+ * $attributes = $myCoolArray->get();
+ *
+ *
+ * // To remove single attribute:
+ *
+ * $this->remove('foo');
+ *
+ *
+ * // To remove specific attributes:
+ *
+ * $this->clear(array('foo', 'baz'));
+ *
+ *
+ * // To clear all attributes:
+ *
+ * $myCoolArray->nuke();
+ *
+ *
+ * // To convert all atributes to normal array:
+ *
+ * $myArray = $myCoolArray->toArray();
+ *
+ *
+ * // Oh, once more, you can also echoing the object, and convert them to JSON automagically!
+ *
+ * echo $myCoolArray; // Output is a JSON // or equal with: echo $myCoolArray->toJson();
+ *
+ * // In PHP >= 5.4, you can convert this object to json by:
+ *
+ * $myJSON = json_encode($myCollArray); // Equals with: $myJSON = json_encode($myCoolArray->toArray());
+ * ```
  * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
  */
 class Fluent implements ArrayAccess, JsonSerializable, Arrayable

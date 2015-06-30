@@ -8,7 +8,7 @@ use Docolight\Support\Fluent;
 use Docolight\Support\Collection;
 
 /**
- * Array helper.
+ * A Data Provider with `Docolight\Support\Collection` as it's data source.
  *
  * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
  */

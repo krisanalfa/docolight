@@ -12,7 +12,54 @@ use InvalidArgumentException;
 use Docolight\Http\Contracts\Arrayable;
 
 /**
- * Fluent collection.
+ * Collection contains a lot of handy methods that will make your work so much easier.
+ *
+ * ```php
+ * $results = json_decode($github->request('users/krisanalfa/repos'));
+ *
+ * // Wrap them in a collection.
+ * $collection = new \Docolight\Support\Collection($results);
+ *
+ * // Sort descending by stars.
+ * $collection->sortByDesc('stargazers_count');
+ *
+ * // Get top 5 repositories.
+ * $topFiveRepo = $leaderboard->take(5);
+ *
+ * // This method will return every value of a given key. The following example returns every user's email address, indexed by their user id.
+ * $collection->lists('email', 'id');
+ *
+ * // This will run a filter function over each of the items. If the callback returns true, it will be present in the resulting collection.
+ * $collection->filter(function($user) { if ($user->isNearby($me)) return true; });
+ *
+ * // Another great thing about collections is that they can easily be converted to json.
+ * echo $collection->toJson();
+ *
+ * // When you cast a collection to a string, it will actually call the toJson method
+ * echo $collection;
+ *
+ * // Something that's quite obvious is the count method, which just returns you how many items there are in the collection.
+ * $collection->count();
+ *
+ * // Works just like the query, takes the first or last number of items.
+ * $fiveFirst = $collection->take(5);
+ * $fiveLast = $collection->take(-5);
+ *
+ * // The sum method will return the sum based on the key or a callback function:
+ * $collection->sum('points');
+ *
+ * // You can use sortBy or sortByDesc to sort the collection based on a key or a callback function:
+ * $collection->sortBy('name');
+ *
+ * // Sort descending by rating.
+ * $collection->sortByDesc(function($item) { return $item->rating; });
+ *
+ * // You can also filter your items
+ * $collection->filter(function ($item) { $item->foo === true; }); // will return the collection with foo === true
+ *
+ * // You can paginate the collection too!
+ * $collection->forPage(1, 20); // For page 1, each page has 20 items in it
+ * ```
  *
  * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
  */
