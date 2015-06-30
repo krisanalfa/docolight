@@ -2,34 +2,9 @@
 
 use Docolight\Support\Arr;
 use Docolight\Support\Str;
+use Docolight\Support\Fluent;
 use Docolight\Support\Collection;
 use Docolight\Support\Debug\Dumper;
-
-if (!function_exists('append_config')) {
-    /**
-     * Assign high numeric IDs to a config item to force appending.
-     *
-     * @param array $array
-     *
-     * @return array
-     *
-     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
-     */
-    function append_config(array $array)
-    {
-        $start = 9999;
-
-        foreach ($array as $key => $value) {
-            if (is_numeric($key)) {
-                $start++;
-
-                $array[$start] = Arr::pull($array, $key);
-            }
-        }
-
-        return $array;
-    }
-}
 
 if (!function_exists('array_add')) {
     /**
@@ -411,6 +386,22 @@ if (!function_exists('collect')) {
     }
 }
 
+if (!function_exists('fluent')) {
+    /**
+     * Create a new model from the given value.
+     *
+     * @param mixed $value
+     *
+     * @return \Docolight\Support\Fluent
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
+     */
+    function fluent($value = null)
+    {
+        return new Fluent($value);
+    }
+}
+
 if (!function_exists('data_get')) {
     /**
      * Get an item from an array or object using "dot" notation.
@@ -706,23 +697,6 @@ if (!function_exists('str_limit')) {
     }
 }
 
-if (!function_exists('str_plural')) {
-    /**
-     * Get the plural form of an English word.
-     *
-     * @param string $value
-     * @param int    $count
-     *
-     * @return string
-     *
-     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
-     */
-    function str_plural($value, $count = 2)
-    {
-        return Str::plural($value, $count);
-    }
-}
-
 if (!function_exists('str_random')) {
     /**
      * Generate a more truly "random" alpha-numeric string.
@@ -760,22 +734,6 @@ if (!function_exists('str_replace_array')) {
         }
 
         return $subject;
-    }
-}
-
-if (!function_exists('str_singular')) {
-    /**
-     * Get the singular form of an English word.
-     *
-     * @param string $value
-     *
-     * @return string
-     *
-     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
-     */
-    function str_singular($value)
-    {
-        return Str::singular($value);
     }
 }
 
@@ -825,6 +783,22 @@ if (!function_exists('title_case')) {
     function title_case($value)
     {
         return Str::title($value);
+    }
+}
+
+if (!function_exists('trimtolower')) {
+    /**
+     * Trim and convert a value to lowercase.
+     *
+     * @param string $value
+     *
+     * @return string
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
+     */
+    function trimtolower($value)
+    {
+        return trim(mb_strtolower($value));
     }
 }
 
@@ -1073,6 +1047,8 @@ if (!function_exists('request')) {
      * @param mixed       $default
      *
      * @return mixed
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
      */
     function request($identifier = null, $default = null)
     {
@@ -1098,6 +1074,8 @@ if (!function_exists('input')) {
      * @param mixed       $default
      *
      * @return mixed
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
      */
     function input($identifier = null, $default = null)
     {
@@ -1109,6 +1087,42 @@ if (!function_exists('input')) {
     }
 }
 
+if (!function_exists('array_replace_value')) {
+    /**
+     * Replace your array value.
+     *
+     * ```php
+     * $header = [
+     *     ':type_address',
+     *     ':type_citizenship',
+     *     ':type_city',
+     *     ':type_country' ]
+     *
+     * Arr::replaceValue($header, ':type_')
+     *
+     * // Will produce:
+     *
+     * $header = [
+     *     'address',
+     *     'citizenship',
+     *     'city',
+     *     'country' ]
+     * ```
+     *
+     * @param array           $input
+     * @param string|callable $search
+     * @param string          $replacement
+     *
+     * @return array
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
+     */
+    function array_replace_value(array $input, $search, $replacement = '')
+    {
+        return Arr::replaceValue($input, $search, $replacement);
+    }
+}
+
 if (!function_exists('get')) {
     /**
      * Get $_GET value
@@ -1117,6 +1131,8 @@ if (!function_exists('get')) {
      * @param mixed       $default
      *
      * @return mixed
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
      */
     function get($identifier = null, $default = null)
     {
@@ -1135,6 +1151,8 @@ if (!function_exists('transaction')) {
      * @param \CDbConnection $connection
      *
      * @return \CDbTransaction
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
      */
     function transaction(CDbConnection $connection)
     {
@@ -1163,6 +1181,8 @@ if (!function_exists('response')) {
      * @param bool    $immediatelySend Choose whether to immediately send the response or not
      *
      * @return mixed
+     *
+     * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
      */
     function response($driver = 'base', $status = 200, $body = '', array $headers = array(), $immediatelySend = false)
     {
