@@ -1,12 +1,13 @@
 <?php
 
-namespace Docolight\Docoflow\Models;
+namespace Docoflow\Models;
 
 use CDbCriteria;
 use CActiveRecord;
 use CActiveDataProvider;
-use Docolight\Docoflow\Traits\Validable;
-use Docolight\Docoflow\Traits\HasMutator;
+use Docoflow\Traits\Validable;
+use Docoflow\Traits\HasMutator;
+use Docoflow\Contracts\ValidationStatus;
 
 /**
  * This is the model class for table "workflow".
@@ -20,7 +21,7 @@ use Docolight\Docoflow\Traits\HasMutator;
  *
  * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
  */
-class Workflow extends CActiveRecord
+class Workflow extends CActiveRecord implements ValidationStatus
 {
     use Validable, HasMutator;
 
@@ -77,7 +78,7 @@ class Workflow extends CActiveRecord
         // NOTE: you may need to adjust the relation name and the related
         // class name for the relations automatically generated below.
         return array(
-            'steps' => array(static::HAS_MANY, '\Docolight\Docoflow\Models\WorkflowStep', 'workflow_id'),
+            'steps' => array(static::HAS_MANY, '\Docoflow\Models\WorkflowStep', 'workflow_id'),
         );
     }
 

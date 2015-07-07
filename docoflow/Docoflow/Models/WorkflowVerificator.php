@@ -1,10 +1,13 @@
 <?php
 
-namespace Docolight\Docoflow\Models;
+namespace Docoflow\Models;
 
-use Closure;
+use CDbCriteria;
 use CActiveRecord;
-use Docolight\Docoflow\Traits\HasMutator;
+use CActiveDataProvider;
+use Docoflow\Traits\Validable;
+use Docoflow\Traits\HasMutator;
+use Docoflow\Contracts\ValidationStatus;
 
 /**
  * This is the model class for table "workflow_verificator".
@@ -19,9 +22,9 @@ use Docolight\Docoflow\Traits\HasMutator;
  *
  * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
  */
-class WorkflowVerificator extends CActiveRecord
+class WorkflowVerificator extends CActiveRecord implements ValidationStatus
 {
-    use HasMutator;
+    use HasMutator, Validable;
 
     /**
      * Returns the static model of the specified AR class.
@@ -60,7 +63,7 @@ class WorkflowVerificator extends CActiveRecord
         // will receive user inputs.
         return array(
             array('workflow_groups_id, user_id', 'required'),
-            array('workflow_groups_id, user_id, status', 'numerical', 'integerOnly' => true),
+            array('workflow_groups_id, status', 'numerical', 'integerOnly' => true),
             array('message', 'safe'),
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
@@ -76,7 +79,7 @@ class WorkflowVerificator extends CActiveRecord
         // NOTE: you may need to adjust the relation name and the related
         // class name for the relations automatically generated below.
         return array(
-            'group' => array(static::BELONGS_TO, '\Docolight\Docoflow\Models\WorkflowGroups', 'workflow_groups_id'),
+            'group' => array(static::BELONGS_TO, '\Docoflow\Models\WorkflowGroups', 'workflow_groups_id'),
         );
     }
 

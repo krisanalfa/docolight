@@ -1156,6 +1156,10 @@ if (!function_exists('transaction')) {
      */
     function transaction(CDbConnection $connection)
     {
+        if (container()->bound($connectionClass = get_class($connection))) {
+            return container($connectionClass);
+        }
+
         $transaction = $connection->getCurrentTransaction();
 
         if (is_null($transaction)) {
@@ -1166,7 +1170,11 @@ if (!function_exists('transaction')) {
             $connection->setActive(true);
         }
 
-        return $transaction;
+        container()->bindIf($connectionClass, function () use ($transaction) {
+            return $transaction;
+        }, true);
+
+        return container($connectionClass);
     }
 }
 

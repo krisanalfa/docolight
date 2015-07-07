@@ -1,6 +1,6 @@
 <?php
 
-namespace Docolight\Docoflow\Traits;
+namespace Docoflow\Traits;
 
 /**
  * You can attach a static macro method to this class. Means, you can extend the class on the fly.
@@ -19,7 +19,7 @@ trait HasMutator
     /**
      * Static implementation of this class.
      *
-     * @var \Docolight\Docoflow\Models\WorkflowVerificator
+     * @var \Docoflow\Models\WorkflowVerificator
      */
     protected static $instance;
 
@@ -38,7 +38,7 @@ trait HasMutator
     /**
      * Statically get instance, useful to get instance from mutator
      *
-     * @return \Docolight\Docoflow\Models\WorkflowVerificator
+     * @return \Docoflow\Models\WorkflowVerificator
      */
     public static function getInstance()
     {

@@ -466,10 +466,11 @@ Docoflow is a workflow generator. You can maintain your own workflow by this lib
 ### Example to Create A New Workflow
 
 ```php
-use Docolight\Docoflow\Docoflow;
-use Docolight\Docoflow\Entity\Step;
-use Docolight\Docoflow\Entity\Group;
-use Docolight\Docoflow\Entity\Verificator;
+use Carbon\Carbon;
+use Docoflow\Docoflow;
+use Docoflow\Entity\Step;
+use Docoflow\Entity\Group;
+use Docoflow\Entity\Verificator;
 
 $docoflow = new Docoflow('Verifikasi Foo Bar');
 
@@ -524,11 +525,14 @@ $workflow = $docoflow
     ->save();                              // Save ke dalam database
 ```
 
-### Example to Tetch Your Workflow
+### Example to Fetch Your Workflow
+
+`Flo` is a fluent class that able to manage your workflow in a very simple method. You can bulk accept a workflow, many steps, and even many verificators.
 
 ```php
-use Docolight\Docoflow\Flo;
-use Docolight\Docoflow\Models\WorkflowVerificator;
+use User;
+use Docoflow\Flo;
+use Docoflow\Models\WorkflowVerificator;
 
 // Fetch by workflow id stored in database
 $myWorkFlow = Flo::fetch(1);
@@ -542,6 +546,14 @@ dd($myWorkFlow->steps()); // Get all stepp
 dd($myWorkFlow->step(1)); // Get the first step
 dd($myWorkFlow->step(3)); // Get the third step
 
+$myWorkFlow->step(1)->reject()->save();  // Reject the first step
+$myWorkFlow->step(1)->approve()->save(); // Approve the first step
+$myWorkFlow->step(1)->reset()->save();   // Reset verification status in the first step
+
+$myWorkFlow->step(1)->rejectIf()->save();  // Reject the first step if the verification progess is not expired yet
+$myWorkFlow->step(1)->approveIf()->save(); // Approve the first step if the verification progess is not expired yet
+$myWorkFlow->step(1)->resetIf()->save();   // Reset verification status in the first step if the verification progess is not expired yet
+
 dd($myWorkFlow->step(1)->valid()); // Determine if first step is still valid to be verified
 
 dd($myWorkFlow->groups()); // Get all groups
@@ -549,7 +561,16 @@ dd($myWorkFlow->groups()); // Get all groups
 dd($myWorkFlow->groupsInStep(1)); // Get all groups in first step only
 dd($myWorkFlow->groupsInStep(4)); // Get all groups in fourth step only
 
+// You can also reject all verificators in certain group by
+$myWorkFlow->groupsInStep(4)->reject()->save(); // Also works for rejectIf, approve, approveIf, reset, and resetIf
+
 dd($myWorkFlow->verificators()); // Get all verificators
+
+// You can also bulk approve all verificators
+$myWorkFlow->verificators()->approve()->save();
+
+// To reset verification status from verificators in the second step only
+$myWorkFlow->verificatorsInStep(2)->reset()->save();
 
 // Set a mutator. You can change the behavior of Workflow verificator when it's going to fetch user information
 // by called this static method. The first argument of your callback is WorkflowVerificator active record.
@@ -565,7 +586,16 @@ WorkflowVerificator::mutate('user', function ($model) {
     ])) : null;
 });
 
+// Call mutator
 dd($myWorkFlow->verificatorsInStep(1)->first()->getUser()); // Get user information
+
+// If you want to approve a user determine by it's user_id
+$idEqualsOne = $workflow->verificatorsInStep(1)->first(function($key, $value) {
+    return (int) $value->getAttribute('user_id') === 1;
+});
+
+// Approving
+$idEqualsOne->approve()->save();
 
 // Send your workflow thru a json response
 response('json', 200, $myWorkFlow->toArray(true))->send();

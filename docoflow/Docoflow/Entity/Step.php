@@ -1,10 +1,11 @@
 <?php
 
-namespace Docolight\Docoflow\Entity;
+namespace Docoflow\Entity;
 
 use Exception;
+use Docoflow\Traits\Entity;
 use Docolight\Support\Collection;
-use Docolight\Docoflow\Traits\Entity;
+use Docoflow\Traits\BulkValidator;
 
 /**
  * Step entities.
@@ -13,19 +14,19 @@ use Docolight\Docoflow\Traits\Entity;
  */
 class Step extends Collection
 {
-    use Entity;
+    use Entity, BulkValidator;
 
     /**
      * Group entities. Useful to determine a verificator group.
      *
-     * @var \Docolight\Docoflow\Entity\Group.
+     * @var \Docoflow\Entity\Group.
      */
     protected $groups;
 
     /**
      * Rebuild a barely new step to a readable array.
      *
-     * @return \Docolight\Docoflow\Entity\Step
+     * @return \Docoflow\Entity\Step
      */
     public function rebuild()
     {

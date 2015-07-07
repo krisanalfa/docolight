@@ -1,34 +1,37 @@
 <?php
 
-namespace Docolight\Docoflow\Models;
+namespace Docoflow\Models;
 
 use CDbCriteria;
 use CActiveRecord;
 use CActiveDataProvider;
-use Docolight\Docoflow\Traits\HasMutator;
+use Docoflow\Traits\Validable;
+use Docoflow\Traits\HasMutator;
+use Docoflow\Contracts\ValidationStatus;
 
 /**
- * This is the model class for table "workflow_groups".
+ * This is the model class for table "workflow_step".
  *
- * The followings are the available columns in table 'workflow_groups':
+ * The followings are the available columns in table 'workflow_step':
  *
  * @property integer $id
- * @property integer $workflow_step_id
+ * @property integer $workflow_id
  * @property string  $name
  * @property integer $status
+ * @property string  $expired_at
  *
  * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
  */
-class WorkflowGroups extends CActiveRecord
+class WorkflowStep extends CActiveRecord implements ValidationStatus
 {
-    use HasMutator;
+    use HasMutator, Validable;
 
     /**
      * Returns the static model of the specified AR class.
      *
      * @param string $className active record class name.
      *
-     * @return WorkflowGroups the static model class
+     * @return WorkflowStep the static model class
      */
     public static function model($className = __CLASS__)
     {
@@ -48,7 +51,7 @@ class WorkflowGroups extends CActiveRecord
      */
     public function tableName()
     {
-        return 'workflow_groups';
+        return 'workflow_step';
     }
 
     /**
@@ -59,12 +62,13 @@ class WorkflowGroups extends CActiveRecord
         // NOTE: you should only define rules for those attributes that
         // will receive user inputs.
         return array(
-            array('workflow_step_id', 'required'),
-            array('workflow_step_id, status', 'numerical', 'integerOnly' => true),
+            array('workflow_id', 'required'),
+            array('workflow_id, status', 'numerical', 'integerOnly' => true),
             array('name', 'length', 'max' => 255),
+            array('expired_at', 'safe'),
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            array('id, workflow_step_id, name, status', 'safe', 'on' => 'search'),
+            array('id, workflow_id, name, status, expired_at', 'safe', 'on' => 'search'),
         );
     }
 
@@ -76,8 +80,8 @@ class WorkflowGroups extends CActiveRecord
         // NOTE: you may need to adjust the relation name and the related
         // class name for the relations automatically generated below.
         return array(
-            'step' => array(static::BELONGS_TO, '\Docolight\Docoflow\Models\WorkflowStep', 'workflow_step_id'),
-            'verificators' => array(static::HAS_MANY, '\Docolight\Docoflow\Models\WorkflowVerificator', 'workflow_groups_id'),
+            'workflow' => array(static::BELONGS_TO, '\Docoflow\Models\Workflow', 'workflow_id'),
+            'groups' => array(static::HAS_MANY, '\Docoflow\Models\WorkflowGroups', 'workflow_step_id'),
         );
     }
 
@@ -88,9 +92,10 @@ class WorkflowGroups extends CActiveRecord
     {
         return array(
             'id' => 'ID',
-            'workflow_step_id' => 'Workflow Step',
+            'workflow_id' => 'Workflow',
             'name' => 'Name',
             'status' => 'Status',
+            'expired_at' => 'Expired At',
         );
     }
 
@@ -107,9 +112,10 @@ class WorkflowGroups extends CActiveRecord
         $criteria = new CDbCriteria();
 
         $criteria->compare('id', $this->id);
-        $criteria->compare('workflow_step_id', $this->workflow_step_id);
+        $criteria->compare('workflow_id', $this->workflow_id);
         $criteria->compare('name', $this->name, true);
         $criteria->compare('status', $this->status);
+        $criteria->compare('expired_at', $this->expired_at, true);
 
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria,

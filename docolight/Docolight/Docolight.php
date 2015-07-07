@@ -109,6 +109,7 @@ class Docolight extends CApplicationComponent
             'symfony',
             'carbon',
             'docolight',
+            'docoflow',
         );
     }
 }

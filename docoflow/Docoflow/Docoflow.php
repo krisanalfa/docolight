@@ -1,17 +1,17 @@
 <?php
 
-namespace Docolight\Docoflow;
+namespace Docoflow;
 
 use Yii;
 use Datetime;
 use Exception;
-use Docolight\Docoflow\Entity\Step;
-use Docolight\Docoflow\Entity\Group;
-use Docolight\Docoflow\Entity\Verificator;
-use Docolight\Docoflow\Models\Workflow;
-use Docolight\Docoflow\Models\WorkflowStep;
-use Docolight\Docoflow\Models\WorkflowGroups;
-use Docolight\Docoflow\Models\WorkflowVerificator;
+use Docoflow\Entity\Step;
+use Docoflow\Entity\Group;
+use Docoflow\Entity\Verificator;
+use Docoflow\Models\Workflow;
+use Docoflow\Models\WorkflowStep;
+use Docoflow\Models\WorkflowGroups;
+use Docoflow\Models\WorkflowVerificator;
 
 /**
  * Workflow model. Use this class to save your workflow.
@@ -23,35 +23,35 @@ class Docoflow
     /**
      * Prepare a data to be stored in database.
      *
-     * @var \Docolight\Docoflow\Entity\Step
+     * @var \Docoflow\Entity\Step
      */
     protected $prepared;
 
     /**
      * Workflow active record.
      *
-     * @var \Docolight\Docoflow\Models\Workflow
+     * @var \Docoflow\Models\Workflow
      */
     protected $workflow;
 
     /**
      * Workflow step entities.
      *
-     * @var \Docolight\Docoflow\Entity\Step
+     * @var \Docoflow\Entity\Step
      */
     protected $step;
 
     /**
      * Workflow group entities.
      *
-     * @var \Docolight\Docoflow\Entity\Group
+     * @var \Docoflow\Entity\Group
      */
     protected $group;
 
     /**
      * Verificator entities.
      *
-     * @var \Docolight\Docoflow\Entity\Verificator
+     * @var \Docoflow\Entity\Verificator
      */
     protected $verificator;
 
@@ -66,9 +66,9 @@ class Docoflow
      * Docoflow class constructor.
      *
      * @param string                                      $name        Your workflow name
-     * @param \Docolight\Docoflow\Entity\Step|null        $step        Your workflow step entities
-     * @param \Docolight\Docoflow\Entity\Group|null       $group       Your workflow group entities
-     * @param \Docolight\Docoflow\Entity\Verificator|null $verificator Your workflow verificator entities
+     * @param \Docoflow\Entity\Step|null        $step        Your workflow step entities
+     * @param \Docoflow\Entity\Group|null       $group       Your workflow group entities
+     * @param \Docoflow\Entity\Verificator|null $verificator Your workflow verificator entities
      */
     public function __construct($name, Step $step = null, Group $group = null, Verificator $verificator = null)
     {
@@ -82,9 +82,9 @@ class Docoflow
      * Statically create Docoflow instance.
      *
      * @param string                                      $name        Your workflow name
-     * @param \Docolight\Docoflow\Entity\Step|null        $step        Your workflow step entities
-     * @param \Docolight\Docoflow\Entity\Group|null       $group       Your workflow group entities
-     * @param \Docolight\Docoflow\Entity\Verificator|null $verificator Your workflow verificator entities
+     * @param \Docoflow\Entity\Step|null        $step        Your workflow step entities
+     * @param \Docoflow\Entity\Group|null       $group       Your workflow group entities
+     * @param \Docoflow\Entity\Verificator|null $verificator Your workflow verificator entities
      */
     public static function make($name, Step $step = null, Group $group = null, Verificator $verificator = null)
     {
@@ -94,9 +94,9 @@ class Docoflow
     /**
      * Inject step entities to a record.
      *
-     * @param \Docolight\Docoflow\Entity\Step $step
+     * @param \Docoflow\Entity\Step $step
      *
-     * @return \Docolight\Docoflow\Docoflow
+     * @return \Docoflow\Docoflow
      */
     public function withStep(Step $step)
     {
@@ -108,9 +108,9 @@ class Docoflow
     /**
      * Inject step group entities to a record.
      *
-     * @param \Docolight\Docoflow\Entity\Group $group
+     * @param \Docoflow\Entity\Group $group
      *
-     * @return \Docolight\Docoflow\Docoflow
+     * @return \Docoflow\Docoflow
      */
     public function withGroup(Group $group)
     {
@@ -122,9 +122,9 @@ class Docoflow
     /**
      * Inject verificator entities to a record.
      *
-     * @param \Docolight\Docoflow\Entity\Verificator $verificator
+     * @param \Docoflow\Entity\Verificator $verificator
      *
-     * @return \Docolight\Docoflow\Docoflow
+     * @return \Docoflow\Docoflow
      */
     public function withVerificator(Verificator $verificator)
     {
@@ -138,7 +138,7 @@ class Docoflow
      *
      * @param \Datetime $expiredDate
      *
-     * @return \Docolight\Docoflow\Docoflow
+     * @return \Docoflow\Docoflow
      */
     public function validUntil(Datetime $expiredDate)
     {
@@ -150,7 +150,7 @@ class Docoflow
     /**
      * Save a workflow.
      *
-     * @return \Docolight\Docoflow\Models\Workflow
+     * @return \Docoflow\Models\Workflow
      */
     public function save()
     {
@@ -158,7 +158,7 @@ class Docoflow
             $this->prepare();
         }
 
-        $transaction = transaction(Yii::app()->dbKeuangan);
+        $transaction = transaction(container('docoflow.connection'));
 
         try {
             $newWorkFlowId = $this->createNewWorkFlow();
@@ -178,7 +178,7 @@ class Docoflow
     /**
      * Prepare data before saving
      *
-     * @return \Docolight\Docoflow\Docoflow
+     * @return \Docoflow\Docoflow
      */
     public function prepare()
     {
@@ -208,7 +208,7 @@ class Docoflow
     /**
      * Get prepared data.
      *
-     * @return \Docolight\Docoflow\Entity\Step
+     * @return \Docoflow\Entity\Step
      */
     public function getPreparedData()
     {
@@ -273,7 +273,7 @@ class Docoflow
     /**
      * Create workflow group.
      *
-     * @param \Docolight\Docoflow\Entity\Group $groups
+     * @param \Docoflow\Entity\Group $groups
      * @param id                               $newStepId
      */
     protected function createWorkflowGroup(Group $groups, $newStepId)
@@ -295,7 +295,7 @@ class Docoflow
     /**
      * Create workflow verificators.
      *
-     * @param \Docolight\Docoflow\Entity\Verificator $verificators
+     * @param \Docoflow\Entity\Verificator $verificators
      * @param id                                     $newGroupId
      */
     protected function createWorkflowVerificator(Verificator $verificators, $newGroupId)
