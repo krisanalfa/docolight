@@ -463,6 +463,8 @@ $collection->forPage(1, 20); // For page 1, each page has 20 items in it
 
 Docoflow is a workflow generator. You can maintain your own workflow by this library. To use Docoflow, you may see this example:
 
+> **NOTE** Before using Docoflow, you can import the structure of workflow schema in `workflow.sql` file which stored in the root of this repository.
+
 ### Example to Create A New Workflow
 
 ```php
