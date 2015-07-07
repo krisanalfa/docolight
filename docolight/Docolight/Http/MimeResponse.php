@@ -22,6 +22,14 @@ abstract class MimeResponse extends Response
     /**
      * {@inheritdoc}
      */
+    public function getBody()
+    {
+        return (empty($this->body)) ? $this->getEmpty() : $this->body;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function finalize()
     {
         list($status, $headers, $body) = parent::finalize();
@@ -40,7 +48,9 @@ abstract class MimeResponse extends Response
      */
     public function write($body, $replace = false)
     {
-        return $this->innerWrite($body, $replace);
+        if ($body) {
+            return $this->innerWrite($body, $replace);
+        }
     }
 
     /**

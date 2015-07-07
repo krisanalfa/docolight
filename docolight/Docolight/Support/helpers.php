@@ -396,7 +396,7 @@ if (!function_exists('fluent')) {
      *
      * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
      */
-    function fluent($value = null)
+    function fluent(array $value = array())
     {
         return new Fluent($value);
     }

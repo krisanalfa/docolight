@@ -407,6 +407,7 @@ class Response extends CApplicationComponent implements ArrayAccess
      */
     public function init()
     {
+        parent::init();
     }
 
     /**

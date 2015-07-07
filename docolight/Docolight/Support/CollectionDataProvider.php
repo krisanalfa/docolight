@@ -39,7 +39,9 @@ class CollectionDataProvider extends CDataProvider
         // This contains a list of field that can perform such a free text search
         $this->freeTextField = $freeTextField;
 
-        if (! $collection->first() instanceof Fluent) {
+        $first = $collection->first();
+
+        if (! $first instanceof Fluent) {
             throw new Exception("The items in Collection must be an instance of \Docolight\Support\Fluent.");
         }
 
@@ -47,13 +49,21 @@ class CollectionDataProvider extends CDataProvider
         $sort = $this->getSort();
 
         // Set a list of attributes that available to be sorted
-        $sort->attributes = array_keys($collection->first()->attributes());
+        $sort->attributes = array_keys($first->attributes());
 
         // Set the sort object
         $this->setSort($sort);
 
+        $collectionClassName = get_class($collection);
+
         // Is there any filter from request?
-        $filter = array_filter(request(get_class($collection), array()));
+        $filter = request($collectionClassName, array());
+
+        // In Firefox, backslash (\) from Namespace is converted to underscore (_)
+        $additionalFilter = request(str_replace('\\', '_', $collectionClassName), array());
+
+        // Let's merge them together
+        $filter = array_filter(array_merge($filter, $additionalFilter));
 
         // Make a collection, filter it first if we got a filter request
         $this->collection = (! empty($filter)) ? $this->filterCollection($collection, $filter) : $collection;

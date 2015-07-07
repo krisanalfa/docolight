@@ -50,6 +50,8 @@ class JsonResponse extends MimeResponse
      */
     public function init()
     {
+        parent::init();
+
         if ($this->body === null) {
             $this->body = $this->getEmpty();
         }

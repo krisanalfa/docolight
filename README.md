@@ -458,3 +458,115 @@ $collection->sortByDesc(function($item) { return $item->rating; });
 // You can paginate the collection too!
 $collection->forPage(1, 20); // For page 1, each page has 20 items in it
 ```
+
+## Docoflow
+
+Docoflow is a workflow generator. You can maintain your own workflow by this library. To use Docoflow, you may see this example:
+
+### Example to Create A New Workflow
+
+```php
+use Docolight\Docoflow\Docoflow;
+use Docolight\Docoflow\Entity\Step;
+use Docolight\Docoflow\Entity\Group;
+use Docolight\Docoflow\Entity\Verificator;
+
+$docoflow = new Docoflow('Verifikasi Foo Bar');
+
+// Make some steps for your workflow
+$step = Step::make([
+    [
+        '$id' => 1,
+        'name' => 'Step pertama dari verifikasi Foo Bar',
+        'expired_at' => Carbon::now()->addDay(), // Expired besok
+    ],
+    [
+        '$id' => 2,
+        'name' => 'Step kedua dari verifikasi Foo Bar',
+        'expired_at' => Carbon::now()->addDays(2), // Expired lusa
+    ]
+]);
+
+// Make some groups for your workflow
+$group = Group::make([
+    [
+        '$id' => 1,
+        '$step' => 1,
+        'name' => 'Group Chidori untuk verifikasi Foo Bar. Digunakan untuk step pertama.',
+        'expired_at' => Carbon::now()->addDay(), // Expired besok
+    ],
+    [
+        '$id' => 2,
+        '$step' => 2,
+        'name' => 'Group Raikiri untuk verifikasi Foo Bar. Digunakan untuk step ke dua.',
+        'expired_at' => Carbon::now()->addDay(2), // Expired lusa
+    ]
+]);
+
+// Add some verificators for your workflow
+$verificator = Verificator::make([
+    ['$group' => 1, 'user_id' => 1],
+    ['$group' => 1, 'user_id' => 2],
+    ['$group' => 2, 'user_id' => 3],
+    ['$group' => 2, 'user_id' => 4],
+]);
+
+// Digunakan untuk keperluan transaksional data, gunakan koneksi yang sesuai dengan project kamu
+container()->bind('docoflow.connection', function () {
+    return Yii::app()->myConnection;
+});
+
+$workflow = $docoflow
+    ->withStep($step)                      // Tambahkan step ke dalam workflow
+    ->withGroup($group)                    // Buat group ke dalam workflow
+    ->withVerificator($verificator)        // Tambahkan user verificator ke dalam group
+    ->validuntil(Carbon::now()->addDay(2)) // Valid sampai lusa
+    ->save();                              // Save ke dalam database
+```
+
+### Example to Tetch Your Workflow
+
+```php
+use Docolight\Docoflow\Flo;
+use Docolight\Docoflow\Models\WorkflowVerificator;
+
+// Fetch by workflow id stored in database
+$myWorkFlow = Flo::fetch(1);
+
+dd($myWorkFlow->validUntil()); // Get workflow date validity
+
+dd($myWorkFlow->valid()); // Determine if workflow is still valid to be verified
+
+dd($myWorkFlow->steps()); // Get all stepp
+
+dd($myWorkFlow->step(1)); // Get the first step
+dd($myWorkFlow->step(3)); // Get the third step
+
+dd($myWorkFlow->step(1)->valid()); // Determine if first step is still valid to be verified
+
+dd($myWorkFlow->groups()); // Get all groups
+
+dd($myWorkFlow->groupsInStep(1)); // Get all groups in first step only
+dd($myWorkFlow->groupsInStep(4)); // Get all groups in fourth step only
+
+dd($myWorkFlow->verificators()); // Get all verificators
+
+// Set a mutator. You can change the behavior of Workflow verificator when it's going to fetch user information
+// by called this static method. The first argument of your callback is WorkflowVerificator active record.
+WorkflowVerificator::mutate('user', function ($model) {
+    $model = User::model()->findByPk($model->user_id);
+
+    return ($model) ? fluent(array_except($model->attributes, [
+        'id',
+        'created_date',
+        'created_by',
+        'updated_date',
+        'updated_by',
+    ])) : null;
+});
+
+dd($myWorkFlow->verificatorsInStep(1)->first()->getUser()); // Get user information
+
+// Send your workflow thru a json response
+response('json', 200, $myWorkFlow->toArray(true))->send();
+```
