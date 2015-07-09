@@ -75,6 +75,10 @@ class Docolight extends CApplicationComponent
     {
         Yii::app()->setComponent('container', new Container());
 
+        container()->bind('app', function () {
+            return Yii::app();
+        });
+
         container()->bindIf('Docolight\Http\ResponseFactory', 'Docolight\Http\ResponseFactory', true);
 
         Yii::app()->setComponent('response', container('Docolight\Http\ResponseFactory'));
@@ -110,6 +114,7 @@ class Docolight extends CApplicationComponent
             'carbon',
             'docolight',
             'docoflow',
+            'docotory',
         );
     }
 }

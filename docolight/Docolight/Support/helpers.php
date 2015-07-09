@@ -899,17 +899,23 @@ if (!function_exists('container')) {
      * @param string $make
      * @param array  $parameters
      *
-     * @return mixed|\Container
+     * @return mixed|\Docolight\Container\Container
      *
      * @author Krisan Alfa Timur <krisanalfa@docotel.co.id>
      */
     function container($make = null, array $parameters = array())
     {
-        if (func_num_args() === 0) {
-            return Yii::app()->getComponent('container', false);
+        $container = Yii::app()->getComponent('container', false);
+
+        if ($container === null) {
+            throw new RuntimeException("[Docolight\Container\Container] component has not been registered yet.");
         }
 
-        return Yii::app()->getComponent('container', false)->make($make, $parameters);
+        if (func_num_args() === 0) {
+            return $container;
+        }
+
+        return $container->make($make, $parameters);
     }
 }
 

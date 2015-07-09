@@ -1,8 +1,8 @@
 # Doco[L]ight
 
-We'll enlighten your path! Welcome to DocoLight. DocoLight is a simple yet powerfull library for your Yii 1.1.x application.
+We'll enlighten your path! Welcome to Doco[L]ight. Doco[L]ight is a simple yet powerfull library for your Yii 1.1.x application.
 Enjoy your development! Suck less, code more! I believe your code can be so beauty and your development will be faster,
-because DocoLight include these powerfull packages:
+because Doco[L]ight include these powerfull packages:
 
 - Container (A powerfull Inversion of Control container)
 - HTTP Response (Abstraction)
@@ -44,7 +44,7 @@ To test this package is installed successfuly, you may do this in one of your **
 dd(container('response')->produce());
 ```
 
-If you find a page with something like this, DocoLight has enlighten your life.
+If you find a page with something like this, Doco[L]ight has enlighten your life.
 ![docolight](http://s4.postimg.org/6tgpuicp9/sekretariat_ahu_local_gears_rkakl.png)
 
 ---
@@ -459,9 +459,9 @@ $collection->sortByDesc(function($item) { return $item->rating; });
 $collection->forPage(1, 20); // For page 1, each page has 20 items in it
 ```
 
-## Docoflow
+# Doco[F]low
 
-Docoflow is a workflow generator. You can maintain your own workflow by this library. To use Docoflow, you may see this example:
+Doco[F]low is a workflow generator. You can maintain your own workflow by this library. To use Docoflow, you may see this example:
 
 > **NOTE** Before using Docoflow, you can import the structure of workflow schema in `workflow.sql` file which stored in the root of this repository.
 
@@ -601,4 +601,383 @@ $idEqualsOne->approve()->save();
 
 // Send your workflow thru a json response
 response('json', 200, $myWorkFlow->toArray(true))->send();
+```
+
+# Doco[T]ory
+
+Doco[T]ory is a set of helper class to make your Yii application implements [Factory Design Pattern](https://en.wikipedia.org/wiki/Factory_(object-oriented_programming)).
+
+## Example
+
+Let's say you have this code on your controller:
+
+```php
+class MyFactory
+{
+    public function actionIndex()
+    {
+        $this->render('index', [
+            'model' => MyModel::model(),
+            'dataProvider' => MyModel::model()->search(),
+            'foo' => 'bar',
+            'baz' => new Baz(),
+        ]);
+    }
+}
+```
+
+Factory pattern lets you to retain data from any classes by respecting it boundaries. Controller **SHOULD NOT** know where the data comes. So where is the data comes from?
+Here is what Factory stands for. Change your code into like this:
+
+```php
+class MyController
+{
+    protected $factory;
+
+    public function init()
+    {
+        parent::init();
+
+        $this->factory = container('MyFactory');
+    }
+
+    public function actionIndex()
+    {
+        $this->render('index', $this->factory->gainDataForIndexPage());
+    }
+}
+```
+
+In your `MyFactory` class:
+
+```php
+class MyFactory
+{
+    public function gainDataForIndexPage()
+    {
+        return [
+            'model' => $this->model->new(),
+            'dataProvider' => $this->model->search(),
+            'foo' => 'bar',
+            'baz' => new Baz(),
+        ];
+    }
+}
+```
+
+Here is the lack, we know that `model` property doesn't exist in `MyFactory`, but you can injecting all dependency of Factory in `__construct`, something like:
+
+```php
+class MyFactory
+{
+    protected $model;
+    protected $baz;
+
+    public function __construct(Model $model, Baz $baz)
+    {
+        $this->model = $model;
+        $this->baz = $baz;
+    }
+
+    public function gainDataForIndexPage()
+    {
+        return [
+            'model' => $this->model->new(),
+            'dataProvider' => $this->model->search(),
+            'foo' => 'bar',
+            'baz' => $this->baz->make(),
+        ];
+    }
+}
+```
+
+Then let the `container` do the job to resolve the dependency (from it's typehint).
+But somehow this is really a ton weight if the factory has really huge of dependencies.
+Let's say:
+
+```php
+class MyFactory
+{
+    protected $foo;
+    protected $bar;
+    protected $baz;
+    protected $qux;
+    protected $lorem;
+    protected $ipsum;
+    protected $dolor;
+
+    public function __construct(
+        Foo $foo,
+        Bar $bar,
+        Baz $baz,
+        Qux $qux,
+        Lorem $lorem,
+        Ipsum $ipsum,
+        Dolor $Dolor
+    ) {
+        $this->foo = $foo;
+        $this->bar = $bar;
+        $this->baz = $baz;
+        $this->qux = $qux;
+        $this->lorem = $lorem;
+        $this->ipsum = $ipsum;
+        $this->dolor = $dolor;
+    }
+}
+```
+
+The dependency injection is eager loading, means the construction can became so heavy and slow.
+Meanwhile, sometimes we really don't use the dependency itself.
+To handle this. You can extend your class within an abstraction called `Docotory\Factory`.
+
+```php
+use Docotory\Factory;
+
+class MyFactory extends Factory
+{
+    public function gainDataForIndexPage()
+    {
+        return [
+            'model' => $this->model->new(),
+            'dataProvider' => $this->model->search(),
+            'foo' => 'bar',
+            'baz' => $this->baz->make(),
+        ];
+    }
+}
+```
+
+To resolve the `model` dependency, add a method in your factory like this:
+
+```php
+use Docotory\Factory;
+
+class MyFactory extends Factory
+{
+    public function gainDataForIndexPage()
+    {
+        return [
+            'model' => $this->model->new(),
+            'dataProvider' => $this->model->search(),
+            'foo' => 'bar',
+            'baz' => $this->baz->make(),
+        ];
+    }
+
+    protected function createModel()
+    {
+        return container('Model');
+    }
+
+    protected function createBaz()
+    {
+        return new Baz();
+    }
+}
+```
+
+In that way, your Factory now become lazy load. Also, you may hotswap the dependency itself! Now read the code below.
+
+```php
+use Docotory\Factory;
+
+class MyFactory extends Factory
+{
+    public function gainDataForIndexPage()
+    {
+        return [
+            'model' => $this->model->new(),
+            'dataProvider' => $this->model->search(),
+            'foo' => $this->foo->return('bar'),
+            'baz' => $this->baz->make(),
+        ];
+    }
+
+    protected function createModel()
+    {
+        return container('Model');
+    }
+
+    protected function createBaz()
+    {
+        return new Baz();
+    }
+}
+```
+
+The property of `foo` cannot be resolved because sometimes The implementation of `Foo` is determined by the Controller itself. Here you can swapping the dependency as much as you like.
+
+```php
+class MyController
+{
+    protected $factory;
+
+    public function init()
+    {
+        parent::init();
+
+        $this->factory = container('MyFactory');
+    }
+
+    public function actionIndex()
+    {
+        // Foo depends on A class
+        MyFactory::instance('foo', new Foo(new A()));
+
+        $this->render('index', $this->factory->gainDataForIndexPage());
+    }
+
+    public function actionWelcome()
+    {
+        // Now Foo depends on B class
+        MyFactory::instance('foo', new Foo(new B()));
+
+        $this->render('index', $this->factory->gainDataForIndexPage());
+    }
+}
+```
+
+You can also use custom creator if you want to resolve your factory's dependencies.
+
+```php
+class MyController
+{
+    protected $factory;
+
+    public function init()
+    {
+        parent::init();
+
+        $this->factory = container('MyFactory');
+    }
+
+    public function beforeAction($action)
+    {
+        MyFactory::extend('foo', function ($container) use ($action) {
+            if($action->getId() === 'index') {
+                return new Foo(new A());
+            } elseif ($action->getId() === 'welcome') {
+                return new Foo(new B());
+            }
+        });
+
+        return parent::beforeAction($action);
+    }
+
+    public function actionIndex()
+    {
+        $this->render('index', $this->factory->gainDataForIndexPage());
+    }
+
+    public function actionWelcome()
+    {
+        $this->render('index', $this->factory->gainDataForIndexPage());
+    }
+}
+```
+
+Is it crazy?
+
+## Another helpers
+
+You may think that your module can manage your factories. Means you module has so many factory, and it can provide it's factory or whole of it's factories to **ANOTHER MODULE**.
+To do so, you may modify your Module code.
+
+```php
+use Docotory\Traits\HasFactories;
+
+class MyModule extends CWebModule
+{
+    use HasFactories;
+
+    public function init()
+    {
+        // this method is called when the module is being created
+        // you may place code here to customize the module or the application
+
+        // import the module-level models and components
+        $this->setImport(array(
+        ));
+
+        // Factory singleton
+        container()->singleton('MyFactory');
+
+        // Inject factories to this implementation
+        $this->registerFactory('myFactory', 'MyFactory');
+    }
+}
+```
+
+> **NOTE** The second argument of `registerFactory` method should be a string. This string is a key that will be resolved via `Docolight\Container\Container::make` method.
+
+To resolve `MyModule` factory:
+
+```php
+Yii::app()->getModule('my')->factory('myFactory');
+```
+
+## Facade
+
+You may think that it's so terible long way to call the outer-module factory.
+To make it easier, you may add a [facade](https://en.wikipedia.org/wiki/Facade_pattern) that implements your module.
+
+```php
+
+use Docolight\Support\Facade;
+
+class My extends Facade
+{
+    protected static function accessor()
+    {
+        $container = static::container();
+
+        // Hot inject MyModule to the container with alias myModule
+        // So another module can also get the facade implementation
+        $container->bindIf('myModule', function () {
+            return Yii::app()->getModule('my', false);
+        }, true);
+
+        return $container->make('myModule');
+    }
+}
+```
+
+Note that I can't access Facade directly on my own modules child. For example, I have a controller inside `MyModule` module, that controller can't access the facade.
+To fix this problem, change your `MyModule` code to make any of your classes within `MyModule` module (controllers, components, and models) can access the Facade too:
+
+```php
+use Docotory\Traits\HasFactories;
+
+class MyModule extends CWebModule
+{
+    use HasFactories;
+
+    public function init()
+    {
+        // this method is called when the module is being created
+        // you may place code here to customize the module or the application
+
+        // import the module-level models and components
+        $this->setImport(array(
+        ));
+
+        // Factory singleton
+        container()->singleton('MyFactory');
+
+        // Inject factories to this implementation
+        $this->registerFactory('myFactory', 'MyFactory');
+
+        $that = $this;
+
+        container()->singleton('myModule', function () use ($that) {
+            return $that;
+        });
+    }
+}
+```
+
+Then in another module, you can access MyModule module via static method.
+
+```php
+$factoryFromMyModule = My::factory('myFactory');
 ```

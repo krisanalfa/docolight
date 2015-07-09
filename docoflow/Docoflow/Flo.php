@@ -263,8 +263,8 @@ class Flo extends Fluent implements ValidationStatus
         if (! $this->bootstrapped->steps) {
             $this->makeInternalSteps();
         }
-
-        if (empty($steps = $this->step($step))) {
+        $steps = $this->step($step);
+        if (empty($steps)) {
             return [];
         }
 

@@ -62,9 +62,9 @@ class WorkflowVerificator extends CActiveRecord implements ValidationStatus
         // NOTE: you should only define rules for those attributes that
         // will receive user inputs.
         return array(
-            array('workflow_groups_id, user_id', 'required'),
+            array('workflow_groups_id', 'required'),
             array('workflow_groups_id, status', 'numerical', 'integerOnly' => true),
-            array('message', 'safe'),
+            array('user_id, message', 'safe'),
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
             array('id, workflow_groups_id, user_id, status, message', 'safe', 'on' => 'search'),
